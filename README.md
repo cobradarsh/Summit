@@ -53,7 +53,7 @@ SpringBoard tweak injection is on by default in roothide Bootstrap; respring aft
 
 ## Notes
 
-- `TARGET` uses `latest` so it builds with whatever SDK Theos installed (16.x or newer is fine).
+- `TARGET` is pinned to the iOS 16.5 SDK from theos/sdks; newer Xcode SDKs lack the private frameworks the Settings pane links against.
 - Private APIs used: `SBIconView`, `SBSApplicationShortcutItem`, `LSApplicationWorkspace`,
   `+[UIImage _applicationIconImageForBundleIdentifier:format:scale:]`. If an icon looks blurry,
   try a different value for `kSMTHomeIconFormat` in `SMTStackOverlay.m`.
