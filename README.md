@@ -26,6 +26,11 @@ duration, spring damping, spring initial velocity, reset all stacks, respring.
 - `SMTStore.m` – settings and stacks (`com.adarsh.summit` preferences domain)
 - `summitprefs/` – Settings pane
 
+## Building on GitHub (no local setup)
+
+Every push runs `.github/workflows/build.yml` on a GitHub-hosted Linux machine; the `.deb` is attached
+to the run under **Artifacts**.
+
 ## Building on Windows (via WSL)
 
 roothide packages need the **roothide fork of Theos**, which runs on Linux/macOS. On Windows use WSL:
