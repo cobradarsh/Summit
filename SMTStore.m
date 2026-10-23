@@ -113,5 +113,16 @@ NSString *SMTDisplayName(NSString *bundleID) {
 
 void SMTLaunchApp(NSString *bundleID) {
     if (!bundleID.length) return;
-    [[NSClassFromString(@"LSApplicationWorkspace") defaultWorkspace] openApplicationWithBundleID:bundleID];
+
+    // Launch through SpringBoard itself. Calling LaunchServices synchronously from SpringBoard's
+    // main thread stalls for seconds, because LaunchServices turns around and asks SpringBoard to open the app.
+    UIApplication *springBoard = [UIApplication sharedApplication];
+    if ([springBoard respondsToSelector:@selector(launchApplicationWithIdentifier:suspended:)]) {
+        [springBoard launchApplicationWithIdentifier:bundleID suspended:NO];
+        return;
+    }
+
+    dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INTERACTIVE, 0), ^{
+        [[NSClassFromString(@"LSApplicationWorkspace") defaultWorkspace] openApplicationWithBundleID:bundleID];
+    });
 }

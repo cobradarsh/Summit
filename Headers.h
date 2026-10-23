@@ -51,6 +51,11 @@
 - (BOOL)openApplicationWithBundleID:(NSString *)bundleID;
 @end
 
+// Implemented by SpringBoard (the system app) to launch apps in-process.
+@interface UIApplication (SummitPrivate)
+- (BOOL)launchApplicationWithIdentifier:(NSString *)identifier suspended:(BOOL)suspended;
+@end
+
 @interface UIImage (SummitPrivate)
 + (UIImage *)_applicationIconImageForBundleIdentifier:(NSString *)bundleID format:(int)format scale:(CGFloat)scale;
 @end

@@ -1,6 +1,6 @@
 Package: com.adarsh.summit
 Name: Summit
-Version: 1.0.0
+Version: 1.0.1
 Architecture: iphoneos-arm
 Description: Nest apps in stacks under any Home Screen icon. Swipe up to reveal them.
 Maintainer: adarsh
