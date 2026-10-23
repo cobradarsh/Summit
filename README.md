@@ -28,10 +28,14 @@ duration, spring damping, spring initial velocity, reset all stacks, respring.
 
 ## Building on GitHub (no local setup)
 
-Every push runs `.github/workflows/build.yml` on a GitHub-hosted Linux machine; the `.deb` is attached
-to the run under **Artifacts**.
+Every push runs `.github/workflows/build.yml` on GitHub-hosted Macs; the `.deb` is attached to the run
+under **Artifacts**. It must be built with Xcode's clang: the Linux iOS toolchain (clang 11) only emits
+the old arm64e ABI, which iOS 14+ refuses to load into SpringBoard on A12+ devices.
 
 ## Building on Windows (via WSL)
+
+> Note: with the default Linux toolchain (clang 11) the arm64e slice gets the old ABI and will not
+> load on an iPhone XS or newer running iOS 14+. Prefer the GitHub (macOS) build.
 
 roothide packages need the **roothide fork of Theos**, which runs on Linux/macOS. On Windows use WSL:
 

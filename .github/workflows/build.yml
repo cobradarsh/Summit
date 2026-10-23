@@ -1,5 +1,8 @@
-# Builds the roothide .deb on a GitHub-hosted Linux machine. Download it from the run's "Artifacts" section.
-# Mirrors the Linux path of roothide's install-theos script, with the iOS 16.5 SDK pinned.
+# Builds the roothide .deb on GitHub-hosted Macs. Download it from the run's "Artifacts" section.
+#
+# Xcode's clang is required: it emits the arm64e ABI that iOS 14+ loads into SpringBoard.
+# (The Linux iOS toolchain's clang 11 only emits the old arm64e ABI, which SpringBoard rejects.)
+# Hosted Mac capacity is often short, so several Mac types build in parallel; any one result is enough.
 name: Build Summit
 
 on:
@@ -8,8 +11,12 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [macos-15-intel, macos-15, macos-14]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
     env:
       THEOS: ${{ github.workspace }}/theos
     steps:
@@ -18,34 +25,22 @@ jobs:
           path: Summit
 
       - name: Install build tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential fakeroot rsync curl perl zip unzip git libxml2 libtinfo6 xz-utils
+        run: brew install make xz ldid dpkg
 
-      - name: Install roothide Theos and iOS toolchain
+      - name: Install roothide Theos and iOS 16.5 SDK
         run: |
           git clone --recursive --depth 1 https://github.com/roothide/theos.git "$THEOS"
-          mkdir -p "$THEOS/toolchain" "$THEOS/sdks"
-          curl -fsSL https://github.com/L1ghtmann/llvm-project/releases/latest/download/iOSToolchain-x86_64.tar.xz | tar -xJf - -C "$THEOS/toolchain/"
-          BIN="$THEOS/toolchain/linux/iphone/bin"
-          if [ ! -x "$BIN/ldid" ]; then
-            curl -fsSL https://github.com/ProcursusTeam/ldid/releases/latest/download/ldid_linux_x86_64 -o "$BIN/ldid"
-            chmod +x "$BIN/ldid"
-          fi
-          "$BIN/clang" --version
-
-      - name: Install iOS 16.5 SDK
-        run: |
           curl -fsSL https://github.com/theos/sdks/archive/master.zip -o sdks.zip
           unzip -q sdks.zip "sdks-master/iPhoneOS16*" -d sdks
+          mkdir -p "$THEOS/sdks"
           mv sdks/sdks-master/* "$THEOS/sdks/"
           ls "$THEOS/sdks"
 
       - name: Build package
         working-directory: Summit
-        run: make clean package FINALPACKAGE=1
+        run: gmake clean package FINALPACKAGE=1
 
       - uses: actions/upload-artifact@v4
         with:
-          name: Summit-deb
+          name: Summit-deb-${{ matrix.runner }}
           path: Summit/packages/*.deb
