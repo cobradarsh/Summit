@@ -1,0 +1,37 @@
+# Builds the roothide .deb on a GitHub-hosted Mac. Download it from the run's "Artifacts" section.
+name: Build Summit
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-14
+    env:
+      THEOS: ${{ github.workspace }}/theos
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: Summit
+
+      - name: Install build tools
+        run: brew install make xz ldid dpkg
+
+      - name: Install roothide Theos
+        run: |
+          git clone --recursive --depth 1 https://github.com/roothide/theos.git "$THEOS"
+          curl -fsSL https://github.com/theos/sdks/archive/master.zip -o sdks.zip
+          unzip -q sdks.zip "sdks-master/iPhoneOS16*" -d sdks
+          mkdir -p "$THEOS/sdks"
+          mv sdks/sdks-master/* "$THEOS/sdks/"
+          ls "$THEOS/sdks"
+
+      - name: Build package
+        working-directory: Summit
+        run: gmake clean package FINALPACKAGE=1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Summit-deb
+          path: Summit/packages/*.deb
